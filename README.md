@@ -2,6 +2,7 @@
 
 # metadata 🗃️
 
+
 ### *Web Application File Reconnaissance & Metadata Extractor*
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
@@ -39,10 +40,10 @@ Metadata bridges the gap between basic web scraping and advanced metadata forens
 - Compiles fully formatted Markdown reports containing detailed file summaries (`_idem-meta-summary.md`) and high-level analytical metrics (`_meta_executive-summary.md`).
 
 ## Main Features
-- **Multithreaded Performance:** Fast asynchronous processing using Python's `ThreadPoolExecutor`.
-- **Safe Resource Management:** Built-in file size limits (`--max-file-size`) and download timeouts to prevent memory exhaustion on large binaries.
-- **Customizable Execution:** Adjust thread counts, crawling depth, timeouts, or omit metadata extraction to act as a pure file finder.
-- **Clean Terminal UI:** Structured execution prompts with real-time progress indicators.
+- Fast asynchronous processing using Python's `ThreadPoolExecutor`.
+- Built-in file size limits (`--max-file-size`) and download timeouts to prevent memory exhaustion on large binaries.
+- Adjust thread counts, crawling depth, timeouts, or omit metadata extraction to act as a pure file finder.
+- Structured execution prompts with real-time progress indicators.
 
 ## Installation
 Ensure you have Python 3.8 or higher installed, then clone the repository and install dependencies:
@@ -61,28 +62,38 @@ pip install -r requirements.txt
 To analyze a target domain and automatically generate your executive reports and URL lists, run the main script:
 ```bash
 python3 -m venv venv && source venv/bin/activate
-python3 metadata.py
-
-positional arguments:
-  domain                Domain to analyze (e.g., domain.com)
-
-options:
-  -h, --help            show this help message and exit
-  -f FILE, --file FILE  File with a list of domains (one per line)
-  -t THREADS, --threads THREADS
-                        Maximum number of threads (default: 3)
-  -d DEPTH, --depth DEPTH
-                        Maximum crawling depth (default: 2)
-  -o OUTPUT, --output OUTPUT
-                        Output file to save detailed results
-  --no-summary          Do not generate per-domain summary files
-  --no-metadata         Do not extract metadata (find files only)
-  --metadata-timeout METADATA_TIMEOUT
-                        Timeout for metadata downloads (default: 45)
-  --max-file-size MAX_FILE_SIZE
-                        Maximum file size in MB (default: 50)
-  --executive-only      Generate executive summary only
 ```
+```bash
+python3 metadata.py
+```
+
+
+<img width="1605" height="464" alt="image" src="https://github.com/user-attachments/assets/c4401261-1aa7-487f-9d88-e8720a61e000" />
+
+## Resultados
+<img width="1532" height="399" alt="image" src="https://github.com/user-attachments/assets/ed5d812d-1b97-42a1-b88f-dfa38a26a196" />
+
+### Technical Report Section
+Detailed breakdown of the analyzed documents and their extracted metadata parameters.
+<br>
+<br>
+<img width="1851" height="823" alt="image" src="https://github.com/user-attachments/assets/114ff504-26f7-41b2-9f65-49e751275972" />
+
+### Executive Summary Section
+High-level overview of the discovery process and high-impact findings.
+<br>
+<br>
+<img width="1577" height="998" alt="image" src="https://github.com/user-attachments/assets/607ae01a-1aed-41e4-8939-27de90b6f45a" />
+<br>
+<br>
+<img width="1848" height="994" alt="image" src="https://github.com/user-attachments/assets/095a0633-01cf-47a7-bc20-769f9e3b5159" />
+
+### URLs Text File
+A clean, structured plain-text file containing the direct URLs of all files identified during the recursive web crawling phase. This inventory serves as a reliable reference list for manual auditing, secondary downloading, or feeding into other security assessment tools.
+<br>
+<br>
+<img width="1591" height="632" alt="image" src="https://github.com/user-attachments/assets/c18b28dd-6e26-459e-814b-ea07301676fa" />
+
 
 ### Recommended Defensive Mitigation (For Developers)
 If your web application publishes documents, consider implementing the following security practices to minimize information disclosure:
