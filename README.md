@@ -48,7 +48,7 @@ Metadata bridges the gap between basic web scraping and advanced metadata forens
 Ensure you have Python 3.8 or higher installed, then clone the repository and install dependencies:
 
 ```bash
-git clone [https://github.com/far00t01/metadata.git
+git clone https://github.com/far00t01/metadata.git
 
 // Create and activate a virtual environment
 python3 -m venv venv && source venv/bin/activate
