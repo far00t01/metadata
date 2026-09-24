@@ -2,7 +2,6 @@
 
 # metadata 🗃️
 
-
 ### *Web Application File Reconnaissance & Metadata Extractor*
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
@@ -67,10 +66,9 @@ python3 -m venv venv && source venv/bin/activate
 python3 metadata.py
 ```
 
-
 <img width="1605" height="464" alt="image" src="https://github.com/user-attachments/assets/c4401261-1aa7-487f-9d88-e8720a61e000" />
 
-## Resultados
+## Results
 <img width="1532" height="399" alt="image" src="https://github.com/user-attachments/assets/ed5d812d-1b97-42a1-b88f-dfa38a26a196" />
 
 ### Technical Report Section
@@ -95,7 +93,7 @@ A clean, structured plain-text file containing the direct URLs of all files iden
 <img width="1591" height="632" alt="image" src="https://github.com/user-attachments/assets/c18b28dd-6e26-459e-814b-ea07301676fa" />
 
 
-### Recommended Defensive Mitigation (For Developers)
+### Mitigation
 If your web application publishes documents, consider implementing the following security practices to minimize information disclosure:
 - Implement automated pre-upload or post-processing pipelines that strip sensitive metadata (author names, internal usernames, software versions, and local paths) from all published documents.
 - Ensure documents containing internal corporate insights, draft policies, or user data are stored behind authentication barriers rather than public web-accessible directories (/wp-content/uploads/, /assets/docs/).
