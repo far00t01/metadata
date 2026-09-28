@@ -111,7 +111,12 @@ python3 metadata.py
 <img width="1605" height="464" alt="image" src="https://github.com/user-attachments/assets/c4401261-1aa7-487f-9d88-e8720a61e000" />
 
 ## Results
-<img width="1532" height="399" alt="image" src="https://github.com/user-attachments/assets/ed5d812d-1b97-42a1-b88f-dfa38a26a196" />
+The tool generates structured, clear, and comprehensive reports categorized into technical details and executive summaries to facilitate findings analysis.
+
+Real-time console tracking during the crawling and metadata extraction stages, displaying progress bars, discovered files, and immediate status metrics.
+<br>
+<br>
+<img width="1283" height="328" alt="image" src="https://github.com/user-attachments/assets/808cddc1-311a-43c1-8ba0-42c68a62decf" />
 
 ### Technical Report Section
 Detailed breakdown of the analyzed documents and their extracted metadata parameters.
@@ -147,6 +152,6 @@ _Developed and maintained by: Fabián Rosales_
 - **GitHub:** [far00t01](https://github.com/far00t01)
 - **LinkedIn:** [frosalesr](https://linkedin.com/in/frosalesr)
 
-### AI Collaboration
+#### AI Collaboration
 This tool and its documentation have been iteratively developed, refined, and optimized in collaboration with **Gemini AI**, Google's advanced personal AI collaborator, ensuring clean architecture, robust error handling, and professional reporting standards.
 
