@@ -384,7 +384,7 @@ class FileFinder:
                 if href.lower().endswith(ext):
                     full_url = urljoin(base_url, href)
                     file_links.append((full_url, ext))
-                    print(f"    [DEBUG] [Enlace Archivo Detectado] Extensión '{ext}' encontrada en <a>: {full_url}")
+                    print(f"    [DEBUG] [Detected File Link] Extension '{ext}' found in <a>: {full_url}")
 
         for tag in soup.find_all(['iframe', 'embed', 'object', 'script']):
             src = tag.get('src') or tag.get('data')
@@ -393,9 +393,9 @@ class FileFinder:
                     if src.lower().endswith(ext):
                         full_url = urljoin(base_url, src)
                         file_links.append((full_url, ext))
-                        print(f"    [DEBUG] [Enlace Archivo Detectado] Extensión '{ext}' encontrada en <{tag.name}>: {full_url}")
+                        print(f"    [DEBUG] [Detected File Link] Extension '{ext}' found in <{tag.name}>: {full_url}")
                         
-        print(f"    [DEBUG] Total de archivos de interés encontrados en la página: {len(file_links)}")
+        print(f"    [DEBUG] Total target files found on the page: {len(file_links)}")
         return file_links
 
     def extract_all_links(self, html_content, base_url, target_domain):
