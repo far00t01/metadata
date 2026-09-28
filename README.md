@@ -103,6 +103,7 @@ pip install -r requirements.txt
 To analyze a target domain and automatically generate your executive reports and URL lists, run the main script:
 ```bash
 python3 -m venv venv && source venv/bin/activate
+cd metadata
 ```
 ```bash
 python3 metadata.py
