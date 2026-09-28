@@ -578,7 +578,7 @@ class FileFinder:
     def generate_urls_txt_file(self, results, domain):
         output_dir = self._get_output_dir(domain)
         domain_name = urlparse(domain if '://' in domain else f'http://{domain}').netloc.replace(':', '_')
-        filename = os.path.join(output_dir, f"{domain_name}_url-metadatos.txt")
+        filename = os.path.join(output_dir, f"{domain_name}_url-metadata.txt")
         
         try:
             with open(filename, 'w', encoding='utf-8') as f:
