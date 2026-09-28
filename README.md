@@ -1,6 +1,7 @@
 <div align="center">
 
 # metadata 🗃️
+<img width="1348" height="770" alt="image" src="https://github.com/user-attachments/assets/e4d6f2cc-b963-4de6-ae01-35687f67a9d1" />
 
 ### *Web Application File Reconnaissance & Metadata Extractor*
 
@@ -37,6 +38,46 @@ Metadata bridges the gap between basic web scraping and advanced metadata forens
 - Automatically organizes outputs into domain-specific directories (`domain.com_results/`).
 - Generates clean plain-text URL lists (`_url-metadatos.txt`) ideal for chaining with other security tools.
 - Compiles fully formatted Markdown reports containing detailed file summaries (`_idem-meta-summary.md`) and high-level analytical metrics (`_meta_executive-summary.md`).
+
+## Architecture
+**metadata** combines multithreaded web reconnaissance with advanced metadata forensics:
+
+```mermaid
+graph TD
+    %% Estilos de nodos
+    classDef startEnd fill:#1f2428,stroke:#58a6ff,stroke-width:2px,color:#fff;
+    classDef process fill:#2d333b,stroke:#444c56,stroke-width:2px,color:#fff;
+    classDef decision fill:#373e47,stroke:#f0883e,stroke-width:2px,color:#fff;
+    classDef output fill:#111a21,stroke:#2ea043,stroke-width:2px,color:#fff;
+
+    %% Flujo principal
+    Start([User / CLI Input]) --> CheckEnv[Environment & Dependency Check]:::startEnd
+    CheckEnv --> Init[Initialize FileFinder & Session]:::process
+    
+    Init --> Crawl[Recursive Web Crawling<br/>ThreadPoolExecutor & BeautifulSoup]:::process
+    Crawl --> SameDomain{Same Domain?}:::decision
+    
+    SameDomain -- No --> Discard[Skip / External Link]:::process
+    SameDomain -- Yes --> ExtractLinks[Extract Target Files<br/>PDF, Office, ZIP]:::process
+    
+    ExtractLinks --> FoundFiles{Files Found?}:::decision
+    FoundFiles -- No --> EndNoFiles([End: No Files]):::startEnd
+    FoundFiles -- Yes --> DL[Download & Size Check<br/>Stream Chunking & Max Size]:::process
+
+    DL --> MetaEngine[Metadata Extractor Engine]:::process
+    
+    MetaEngine --> PDFExt[PDF Parser: pypdf & Regex<br/>Author, Creator, Dates, Pages]:::process
+    MetaEngine --> OfficeExt[Office/ZIP Parser<br/>Internal Stats & Archives]:::process
+
+    PDFExt --> Merge[Consolidate & Sanitize Metadata<br/>Clean UTF-16 BOMs & Artifacts]:::merge
+    OfficeExt --> Merge
+
+    Merge --> Reports[Report Generation Module]:::output
+
+    Reports --> R1[Markdown Summary<br/>_idem-meta-summary.md]:::output
+    Reports --> R2[Plain Text URLs<br/>_url-metadatos.txt]:::output
+    Reports --> R3[Executive Summary<br/>_meta_executive-summary.md]:::output
+```
 
 ## Main Features
 - Fast asynchronous processing using Python's `ThreadPoolExecutor`.
@@ -105,4 +146,6 @@ _Developed and maintained by: Fabián Rosales_
 - **GitHub:** [far00t01](https://github.com/far00t01)
 - **LinkedIn:** [frosalesr](https://linkedin.com/in/frosalesr)
 
+### AI Collaboration
+This tool and its documentation have been iteratively developed, refined, and optimized in collaboration with **Gemini AI**, Google's advanced personal AI collaborator, ensuring clean architecture, robust error handling, and professional reporting standards.
 
