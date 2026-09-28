@@ -1,7 +1,8 @@
 <div align="center">
 
 # metadata 🗃️
-<img width="1348" height="770" alt="image" src="https://github.com/user-attachments/assets/e4d6f2cc-b963-4de6-ae01-35687f67a9d1" />
+<img width="1164" height="771" alt="image" src="https://github.com/user-attachments/assets/8ca13df6-b589-4f2e-a11a-491004cd9270" />
+
 
 ### *Web Application File Reconnaissance & Metadata Extractor*
 
