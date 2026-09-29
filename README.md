@@ -1,7 +1,7 @@
 <div align="center">
 
 # metadata 🗃️
-<img width="1164" height="771" alt="image" src="https://github.com/user-attachments/assets/8ca13df6-b589-4f2e-a11a-491004cd9270" />
+<img width="1156" height="656" alt="image" src="https://github.com/user-attachments/assets/4c3a1052-484e-4435-8d83-ba281ef98401" />
 
 
 ### *Web Application File Reconnaissance & Metadata Extractor*
@@ -102,10 +102,17 @@ pip install -r requirements.txt
 ## Usage
 To analyze a target domain and automatically generate your executive reports and URL lists, run the main script:
 ```bash
+python3 metadata.py
+```
+<img width="1088" height="766" alt="image" src="https://github.com/user-attachments/assets/d421a4b7-7b4b-4ee7-bbd5-6732491024da" />
+<br>
+<br>
+
+```bash
 python3 metadata.py d@main-example.com
 ```
-
 <img width="1605" height="464" alt="image" src="https://github.com/user-attachments/assets/c4401261-1aa7-487f-9d88-e8720a61e000" />
+
 
 ## Results
 The tool generates structured, clear, and comprehensive reports categorized into technical details and executive summaries to facilitate findings analysis.
