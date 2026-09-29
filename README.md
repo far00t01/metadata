@@ -41,7 +41,7 @@ Metadata bridges the gap between basic web scraping and advanced metadata forens
 - Compiles fully formatted Markdown reports containing detailed file summaries (`_idem-meta-summary.md`) and high-level analytical metrics (`_meta_executive-summary.md`).
 
 ## Architecture
-**metadata** combines multithreaded web reconnaissance with advanced metadata forensics:
+Metadata connects basic web scraping with advanced forensics by offering:
 
 ```mermaid
 graph TD
