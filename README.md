@@ -91,6 +91,7 @@ Ensure you have Python 3.8 or higher installed, then clone the repository and in
 
 ```bash
 git clone https://github.com/far00t01/metadata.git
+cd metadata
 
 // Create and activate a virtual environment
 python3 -m venv venv && source venv/bin/activate
