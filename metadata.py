@@ -1,16 +1,32 @@
 #!/usr/bin/env python3
 import sys
 import os
+import json
+import subprocess
 import argparse
 from urllib.parse import urljoin, urlparse
 import threading
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import time
 import re
 from collections import defaultdict
+from io import BytesIO
+import warnings
+
+class SuppressDecodingErrors:
+    def __init__(self, stream):
+        self.stream = stream
+    def write(self, data):
+        if "Some characters could not be decoded" in data:
+            return
+        self.stream.write(data)
+    def flush(self):
+        self.stream.flush()
+
+sys.stderr = SuppressDecodingErrors(sys.stderr)
+
 
 def check_environment_and_dependencies():
-    
     in_venv = hasattr(sys, 'real_prefix') or (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix) or os.getenv('VIRTUAL_ENV')
     
     if not in_venv:
@@ -61,216 +77,113 @@ try:
 except ImportError:
     PDF_SUPPORT = False
 
-
 class MetadataExtractor:
     @staticmethod
-    def extract_pdf_metadata_advanced(file_content: bytes, url: str) -> dict:
+    def extract_metadata(file_content: bytes, url: str, *args, **kwargs) -> dict:
+        filename = os.path.basename(urlparse(url).path)
+        filesize = len(file_content)
         metadata = {
             'URL': url,
-            'Filename': os.path.basename(urlparse(url).path),
-            'FileSize': f"{len(file_content):,} bytes"
+            'Filename': filename,
+            'FileSize': f"{filesize:,} bytes"
         }
-        
-        if not PDF_SUPPORT:
-            metadata['Error'] = 'pypdf not installed'
-            return metadata
-            
-        try:
-            from io import BytesIO
-            pdf_file = BytesIO(file_content)
-            
-            try:
-                pdf_reader = pypdf.PdfReader(pdf_file)
-                
-                if hasattr(pdf_reader, 'metadata') and pdf_reader.metadata:
-                    raw_metadata = pdf_reader.metadata
-                    
-                    metadata_fields = [
-                        ('/Producer', 'Producer'),
-                        ('/Creator', 'Creator'),
-                        ('/Author', 'Author'),
-                        ('/Title', 'Title'),
-                        ('/Subject', 'Subject'),
-                        ('/Keywords', 'Keywords'),
-                        ('/CreationDate', 'CreationDate'),
-                        ('/ModDate', 'ModificationDate'),
-                        ('/CreatorTool', 'CreatorTool'),
-                        ('/Trapped', 'Trapped'),
-                    ]
-                    
-                    for pdf_field, normal_field in metadata_fields:
-                        try:
-                            if hasattr(raw_metadata, pdf_field.strip('/')):
-                                value = getattr(raw_metadata, pdf_field.strip('/'), None)
-                                if value and str(value).strip() and str(value).strip() != 'None':
-                                    clean_value = str(value).strip()
-                                    clean_value = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', clean_value)
-                                    metadata[normal_field] = clean_value
-                        except Exception:
-                            continue
-                
-                try:
-                    metadata['Pages'] = str(len(pdf_reader.pages))
-                except Exception:
-                    metadata['Pages'] = 'Unknown'
-                
-                try:
-                    if pdf_reader.is_encrypted:
-                        metadata['Encrypted'] = 'Yes'
-                        common_passwords = ['', ' ']
-                        for password in common_passwords:
-                            try:
-                                if pdf_reader.decrypt(password):
-                                    metadata['Encrypted'] = f'Decrypted (password: {"empty" if password == "" else password})'
-                                    break
-                            except Exception:
-                                continue
-                except Exception:
-                    pass
-                
-                try:
-                    content_str = file_content.decode('latin-1', errors='ignore')
-                    
-                    patterns = {
-                        'Producer': r'/Producer\s*\(([^)]+)\)',
-                        'Creator': r'/Creator\s*\(([^)]+)\)',
-                        'Author': r'/Author\s*\(([^)]+)\)',
-                        'Title': r'/Title\s*\(([^)]+)\)',
-                        'Subject': r'/Subject\s*\(([^)]+)\)',
-                        'Keywords': r'/Keywords\s*\(([^)]+)\)',
-                        'CreationDate': r'/CreationDate\s*\(([^)]+)\)',
-                        'ModDate': r'/ModDate\s*\(([^)]+)\)',
-                    }
-                    
-                    for field, pattern in patterns.items():
-                        if field not in metadata:
-                            matches = re.findall(pattern, content_str)
-                            if matches:
-                                clean_value = matches[0].strip()
-                                if clean_value and clean_value != 'None':
-                                    clean_value = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', clean_value)
-                                    metadata[field] = clean_value
-                except Exception:
-                    pass
-                
-                try:
-                    if hasattr(pdf_reader, 'trailer'):
-                        trailer = pdf_reader.trailer
-                        if '/Info' in trailer:
-                            info_dict = trailer['/Info']
-                            if hasattr(info_dict, 'items'):
-                                for key, value in info_dict.items():
-                                    if str(key).startswith('/'):
-                                        field_name = str(key)[1:]
-                                        if field_name not in metadata:
-                                            clean_value = str(value).strip()
-                                            if clean_value and clean_value != 'None':
-                                                clean_value = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', clean_value)
-                                                metadata[field_name] = clean_value
-                except Exception:
-                    pass
-                
-                return metadata
-                
-            except Exception as e:
-                metadata['Error'] = f'PDF parsing failed: {str(e)}'
-                return metadata
-                
-        except Exception as e:
-            metadata['Error'] = f'PDF processing failed: {str(e)}'
-            return metadata
 
-    @staticmethod
-    def extract_zip_metadata(file_content: bytes, url: str) -> dict:
-        metadata = {
-            'URL': url,
-            'Filename': os.path.basename(urlparse(url).path),
-            'FileSize': f"{len(file_content):,} bytes",
-            'Type': 'ZIP Archive'
-        }
-        
+        temp_filename = f"temp_{os.getpid()}_{filename}"
         try:
-            import zipfile
-            from io import BytesIO
-            
-            zip_file = BytesIO(file_content)
-            with zipfile.ZipFile(zip_file, 'r') as zf:
-                file_list = zf.namelist()
-                metadata['FilesInArchive'] = str(len(file_list))
-                if file_list:
-                    metadata['SampleFiles'] = ', '.join(file_list[:3]) + ('...' if len(file_list) > 3 else '')
-                    total_size = sum(zf.getinfo(f).file_size for f in file_list)
-                    metadata['TotalUncompressedSize'] = f"{total_size:,} bytes"
-        except Exception as e:
-            metadata['ZipInfo'] = f'Limited info: {str(e)}'
-        
-        return metadata
+            with open(temp_filename, 'wb') as f:
+                f.write(file_content)
 
-    @staticmethod
-    def extract_office_metadata(file_content: bytes, url: str, extension: str) -> dict:
-        file_type = {
-            '.doc': 'Word Document',
-            '.docx': 'Word Document',
-            '.xls': 'Excel Spreadsheet',
-            '.xlsx': 'Excel Spreadsheet',
-            '.ppt': 'PowerPoint Presentation',
-            '.pptx': 'PowerPoint Presentation'
-        }.get(extension.lower(), 'Office Document')
-        
-        metadata = {
-            'URL': url,
-            'Filename': os.path.basename(urlparse(url).path),
-            'FileSize': f"{len(file_content):,} bytes",
-            'Type': file_type
-        }
-        
-        try:
-            content_str = file_content.decode('latin-1', errors='ignore')
-            
-            office_patterns = {
-                'Author': r'Author[^A-Za-z]*([A-Za-z0-9\s\.@]+)',
-                'Title': r'Title[^A-Za-z]*([A-Za-z0-9\s\.]+)',
-                'Subject': r'Subject[^A-Za-z]*([A-Za-z0-9\s\.]+)',
-                'Company': r'Company[^A-Za-z]*([A-Za-z0-9\s\.]+)',
-            }
-            
-            for field, pattern in office_patterns.items():
-                matches = re.findall(pattern, content_str, re.IGNORECASE)
-                if matches:
-                    clean_value = matches[0].strip()
-                    if clean_value and len(clean_value) > 1:
-                        metadata[field] = clean_value
-        except Exception:
-            pass
-        
-        return metadata
+            result = subprocess.run(
+                ['exiftool', '-json', temp_filename],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=10
+            )
 
-    @staticmethod
-    def extract_metadata(file_content: bytes, url: str, extension: str) -> dict:
-        extension = extension.lower()
-        
-        try:
-            if extension == '.pdf':
-                return MetadataExtractor.extract_pdf_metadata_advanced(file_content, url)
-            elif extension == '.zip':
-                return MetadataExtractor.extract_zip_metadata(file_content, url)
-            elif extension in ['.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx']:
-                return MetadataExtractor.extract_office_metadata(file_content, url, extension)
+            if result.returncode == 0 and result.stdout:
+                data = json.loads(result.stdout)
+                if data and isinstance(data, list):
+                    file_meta = data[0]
+                    
+                    ext = os.path.splitext(filename)[1].lower()
+                    
+                    producer = (
+                        file_meta.get('Software') or 
+                        file_meta.get('Application') or 
+                        file_meta.get('Producer') or 
+                        'Unidentified'
+                    )
+                    
+                    creator = (
+                        file_meta.get('Creator') or 
+                        file_meta.get('Author') or 
+                        file_meta.get('Last Modified By') or 
+                        'Unidentified'
+                    )
+                    
+                    author = (
+                        file_meta.get('Author') or 
+                        file_meta.get('Creator') or 
+                        file_meta.get('Last Modified By') or 
+                        'Unidentified'
+                    )
+                    
+                    last_modified_by = (
+                        file_meta.get('Last Modified By') or 
+                        file_meta.get('LastModifiedBy')
+                    )
+
+                    title = file_meta.get('Title')
+                    if not title or not str(title).strip():
+                        title = filename
+
+                    pages = None
+                    if ext == '.pdf':
+                        pages = (
+                            file_meta.get('PageCount') or 
+                            file_meta.get('Page Count') or 
+                            file_meta.get('Pages')
+                        )
+                    elif ext in ['.xlsx', '.xls']:
+                        pages = (
+                            file_meta.get('Heading Pairs') or 
+                            file_meta.get('Pages') or 
+                            file_meta.get('PageCount')
+                        )
+                    else:
+                        pages = (
+                            file_meta.get('Pages') or 
+                            file_meta.get('PageCount') or 
+                            file_meta.get('Page Count')
+                        )
+
+                    if not pages or not str(pages).strip():
+                        pages = '1'
+
+                    metadata['Producer'] = str(producer).strip()
+                    metadata['Creator'] = str(creator).strip()
+                    if last_modified_by and str(last_modified_by).strip():
+                        metadata['Last Modified By'] = str(last_modified_by).strip()
+                    metadata['Title'] = str(title).strip()
+                    metadata['Author'] = str(author).strip()
+                    metadata['Pages'] = str(pages).strip()
+
             else:
-                return {
-                    'URL': url,
-                    'Filename': os.path.basename(urlparse(url).path),
-                    'FileSize': f"{len(file_content):,} bytes",
-                    'Type': 'File'
-                }
-        except Exception as e:
-            return {
-                'URL': url,
-                'Filename': os.path.basename(urlparse(url).path),
-                'FileSize': f"{len(file_content):,} bytes",
-                'Error': f'Metadata extraction failed: {str(e)}'
-            }
+                metadata['Error'] = f"Exiftool execution failed: {result.stderr.strip()}"
 
+        except FileNotFoundError:
+            metadata['Error'] = "exiftool is not installed in the system PATH"
+        except Exception as e:
+            metadata['Error'] = f"Metadata extraction failed: {str(e)}"
+        finally:
+            if os.path.exists(temp_filename):
+                try:
+                    os.remove(temp_filename)
+                except Exception:
+                    pass
+
+        return metadata
 
 class FileFinder:
     def __init__(self, max_threads=10, timeout=30, extract_metadata_flag=True, max_file_size_mb=50):
@@ -306,6 +219,7 @@ class FileFinder:
             'Title', 
             'Author',
             'Pages',
+            'Last Modified By',
             'FileSize'
         ]
 
@@ -384,7 +298,6 @@ class FileFinder:
                 if href.lower().endswith(ext):
                     full_url = urljoin(base_url, href)
                     file_links.append((full_url, ext))
-                    print(f"    [DEBUG] [Detected File Link] Extension '{ext}' found in <a>: {full_url}")
 
         for tag in soup.find_all(['iframe', 'embed', 'object', 'script']):
             src = tag.get('src') or tag.get('data')
@@ -393,9 +306,7 @@ class FileFinder:
                     if src.lower().endswith(ext):
                         full_url = urljoin(base_url, src)
                         file_links.append((full_url, ext))
-                        print(f"    [DEBUG] [Detected File Link] Extension '{ext}' found in <{tag.name}>: {full_url}")
                         
-        print(f"    [DEBUG] Total target files found on the page: {len(file_links)}")
         return file_links
 
     def extract_all_links(self, html_content, base_url, target_domain):
@@ -523,10 +434,6 @@ class FileFinder:
                 f.write(f"**Analyzed Domain:** {domain}\n")
                 f.write(f"**Analysis Date:** {time.strftime('%Y-%m-%d %H:%M:%S')}\n\n")
                 
-                total_files = 0
-                files_with_metadata = 0
-                files_with_interesting_metadata = 0
-                
                 for current_domain, files in results.items():
                     if current_domain == domain and files:
                         files_by_type = {}
@@ -540,19 +447,16 @@ class FileFinder:
                             f.write(f"## {file_type} ({len(file_list)} files)\n\n")
                             
                             for url, ext in sorted(file_list):
-                                total_files += 1
                                 filename_display = os.path.basename(urlparse(url).path)
                                 
                                 f.write(f"### File: {filename_display}\n\n")
                                 f.write(f"**Link:** [{filename_display}]({url})\n\n")
                                 
                                 if url in self.files_with_metadata:
-                                    files_with_metadata += 1
                                     metadata = self.files_with_metadata[url]
                                     filtered_metadata = self._get_filtered_metadata(metadata)
                                     
                                     if any(value != 'Unidentified' for key, value in filtered_metadata.items() if key != 'FileSize'):
-                                        files_with_interesting_metadata += 1
                                         f.write("| Field | Value |\n")
                                         f.write("|-------|-------|\n")
                                         
@@ -709,18 +613,26 @@ class FileFinder:
         filtered_metadata = {}
         
         for field in self.target_fields:
-            if field in metadata and metadata[field] and str(metadata[field]).strip():
-                clean_value = str(metadata[field]).strip()
-                
+            val = metadata.get(field)
+            
+            # Fallbacks específicos si viene vacío
+            if not val or not str(val).strip() or str(val).strip() == 'Unidentified':
+                if field == 'Last Modified By':
+                    val = metadata.get('LastModifiedBy') or metadata.get('Last Modified By')
+                elif field == 'Creator':
+                    val = metadata.get('Creator') or metadata.get('Author')
+                elif field == 'Author':
+                    val = metadata.get('Author') or metadata.get('Creator')
+            
+            if val and str(val).strip() and str(val).strip() != 'Unidentified':
+                clean_value = str(val).strip()
                 clean_value = re.sub(r'^[\xfe\xff\ufffe\ufeff]+', '', clean_value)
                 clean_value = clean_value.replace('\u00fe\u00ff', '').replace('\xff\xfe', '')
-                
                 clean_value = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', clean_value)
-                
                 clean_value = clean_value.strip()
-                filtered_metadata[field] = clean_value if clean_value else 'Unidentified'
-            else:
-                filtered_metadata[field] = 'Unidentified'
+                
+                if clean_value:
+                    filtered_metadata[field] = clean_value
         
         return filtered_metadata
 
@@ -742,15 +654,15 @@ def check_dependencies():
 
 
 def main():
-    banner = r"""
-                 _            _       _         
-                | |          | |     | |        
-  _ __ ___   ___| |_ __ _  __| | __ _| |_ __ _  
- | '_ ` _ \ / _ \ __/ _` |/ _` |/ _` | __/ _` |
- | | | | | |  __/ || (_| | (_| | (_| | || (_| |
- |_| |_| |_|\___|\__\__,_|\__,_|\__,_|\__\__,_| v1.1
+    banner = """
+                _          _       _           
+               | |        | |     | |          
+ _ __ ___   ___| |_ __ _  __| | __ _| |_ __ _  
+| '_ ` _ \\ / _ \\ __/ _` |/ _` |/ _` | __/ _` |
+| | | | | |  __/ || (_| | (_| | (_| | || (_| |
+|_| |_| |_|\\___|\\__\\__,_|\\__,_|\\__,_|\\__\\__,_| v1.1
          Web File Recon & Metadata Extractor
-                by @far00t01
+                     by @far00t01
     """
     print(banner)
 
