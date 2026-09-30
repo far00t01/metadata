@@ -8,8 +8,8 @@
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Library: BeautifulSoup4 & PyPDF](https://img.shields.io/badge/Libraries-BS4%20%7C%20PyPDF-red.svg)](https://pypi.org/)
-[![Platform: Cross-platform](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey.svg)](https://www.python.org/)
+[![Engine: ExifTool](https://img.shields.io/badge/Engine-ExifTool-orange.svg)](https://exiftool.org/)
+[![Library: BeautifulSoup4](https://img.shields.io/badge/Library-BeautifulSoup4-red.svg)](https://pypi.org/)
 
 </div>
 
@@ -31,9 +31,10 @@ Metadata bridges the gap between basic web scraping and advanced metadata forens
 - Targets specific file extensions (`.pdf`, `.doc`, `.docx`, `.xls`, `.xlsx`, `.ppt`, `.pptx`, `.zip`, `.rar`) while ignoring external distractions.
 
 **Advanced Metadata Forensics**
-- Extracts hidden details from **PDFs** (Producer, Creator, Author, Title, Subject, Keywords, Creation Date, Page Counts, and even encrypted/password recovery checks).
-- Extracts structural information from **ZIP archives** (file lists, uncompressed sizes) and **Microsoft Office documents** (internal author signatures, company names, and application tools).
-- Automatically sanitizes encoding artifacts (such as UTF-16 BOMs and `þÿ` prefixes) for clean report rendering.
+- Powered by **[ExifTool](https://exiftool.org/)**, enabling ultra-precise extraction of hidden metadata across dozens of enterprise file formats.
+- Extracts detailed properties from **PDFs** (Page counts, Creator, Author, Title, Creation/Modify Dates).
+- Parses structural and authorial data from **Microsoft Office documents** (`.docx`, `.xlsx`, `.pptx`) including internal revision numbers, software versions, applications, and corporate metadata signatures.
+- Automatically sanitizes encoding artifacts (such as UTF-16 BOMs and binary prefixes) for clean report rendering.
 
 **Structured Automated Reporting**
 - Automatically organizes outputs into domain-specific directories (`domain.com_results/`).
@@ -52,7 +53,7 @@ graph TD
     classDef output fill:#111a21,stroke:#2ea043,stroke-width:2px,color:#fff;
 
     %% Flujo principal
-    Start([User / CLI Input]) --> CheckEnv[Environment & Dependency Check]:::startEnd
+    Start([User / CLI Input]) --> CheckEnv[Environment & Dependency Check<br/>Python + ExifTool Binary]:::startEnd
     CheckEnv --> Init[Initialize FileFinder & Session]:::process
     
     Init --> Crawl[Recursive Web Crawling<br/>ThreadPoolExecutor & BeautifulSoup]:::process
@@ -67,11 +68,9 @@ graph TD
 
     DL --> MetaEngine[Metadata Extractor Engine]:::process
     
-    MetaEngine --> PDFExt[PDF Parser: pypdf & Regex<br/>Author, Creator, Dates, Pages]:::process
-    MetaEngine --> OfficeExt[Office/ZIP Parser<br/>Internal Stats & Archives]:::process
+    MetaEngine --> ExifToolProc[ExifTool CLI Process Wrapper<br/>JSON Extraction & Parsing]:::process
 
-    PDFExt --> Merge[Consolidate & Sanitize Metadata<br/>Clean UTF-16 BOMs & Artifacts]:::merge
-    OfficeExt --> Merge
+    ExifToolProc --> Merge[Consolidate & Sanitize Metadata<br/>Page Counts, Authors, Dates & BOMs]:::merge
 
     Merge --> Reports[Report Generation Module]:::output
 
@@ -87,7 +86,12 @@ graph TD
 - Structured execution prompts with real-time progress indicators.
 
 ## Installation
-Ensure you have Python 3.8 or higher installed, then clone the repository and install dependencies:
+Ensure you have Python 3.8 or higher and **[ExifTool](https://exiftool.org/)**
+
+### Install ExifTool (External Dependency)
+- **Debian / Ubuntu / Kali Linux:**
+  ```bash
+  sudo apt update && sudo apt install libimage-exiftool-perl -y
 
 ```bash
 git clone https://github.com/far00t01/metadata.git
