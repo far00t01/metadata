@@ -114,7 +114,7 @@ python3 metadata.py
 <br>
 
 ```bash
-python3 metadata.py d@main-example.com
+python3 metadata.py d@main-example.it
 ```
 <img width="1576" height="447" alt="image" src="https://github.com/user-attachments/assets/cc7b0036-ce8a-4e12-9adc-b93bafc8d0bf" />
 
@@ -145,7 +145,7 @@ Detailed breakdown of the analyzed documents and their extracted metadata parame
 High-level overview of the discovery process and high-impact findings.
 <br>
 <br>
-<img width="1577" height="998" alt="image" src="https://github.com/user-attachments/assets/607ae01a-1aed-41e4-8939-27de90b6f45a" />
+<img width="1306" height="401" alt="image" src="https://github.com/user-attachments/assets/d0c02877-62af-4da0-9fa6-d79cd73478d1" />
 <br>
 <br>
 <img width="1848" height="994" alt="image" src="https://github.com/user-attachments/assets/095a0633-01cf-47a7-bc20-769f9e3b5159" />
