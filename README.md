@@ -116,7 +116,7 @@ python3 metadata.py
 ```bash
 python3 metadata.py d@main-example.com
 ```
-<img width="1605" height="464" alt="image" src="https://github.com/user-attachments/assets/c4401261-1aa7-487f-9d88-e8720a61e000" />
+<img width="1576" height="447" alt="image" src="https://github.com/user-attachments/assets/cc7b0036-ce8a-4e12-9adc-b93bafc8d0bf" />
 
 
 ## Results
@@ -125,13 +125,21 @@ The tool generates structured, clear, and comprehensive reports categorized into
 Real-time console tracking during the crawling and metadata extraction stages, displaying progress bars, discovered files, and immediate status metrics.
 <br>
 <br>
-<img width="1283" height="328" alt="image" src="https://github.com/user-attachments/assets/808cddc1-311a-43c1-8ba0-42c68a62decf" />
+<img width="1605" height="727" alt="image" src="https://github.com/user-attachments/assets/e7b3f30b-1ce2-4a48-8926-fb4f9b4b9d15" />
+
 
 ### Technical Report Section
 Detailed breakdown of the analyzed documents and their extracted metadata parameters.
 <br>
 <br>
-<img width="1851" height="823" alt="image" src="https://github.com/user-attachments/assets/114ff504-26f7-41b2-9f65-49e751275972" />
+<img width="1839" height="456" alt="image" src="https://github.com/user-attachments/assets/dcdf4470-77bc-4ad7-b404-f356bfae0461" />
+<br>
+<br>
+<img width="1839" height="886" alt="image" src="https://github.com/user-attachments/assets/fe913c30-72be-4730-8728-e79fe6b705c1" />
+<br>
+<br>
+<img width="1845" height="939" alt="image" src="https://github.com/user-attachments/assets/ff61acd1-8037-4d27-b954-572f2f724b86" />
+
 
 ### Executive Summary Section
 High-level overview of the discovery process and high-impact findings.
