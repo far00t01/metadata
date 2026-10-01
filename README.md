@@ -154,8 +154,7 @@ High-level overview of the discovery process and high-impact findings.
 A clean, structured plain-text file containing the direct URLs of all files identified during the recursive web crawling phase. This inventory serves as a reliable reference list for manual auditing, secondary downloading, or feeding into other security assessment tools.
 <br>
 <br>
-<img width="1591" height="632" alt="image" src="https://github.com/user-attachments/assets/c18b28dd-6e26-459e-814b-ea07301676fa" />
-
+<img width="1465" height="368" alt="image" src="https://github.com/user-attachments/assets/5f9ecaad-471c-4303-b73a-e559b953b180" />
 
 ### Mitigation
 If your web application publishes documents, consider implementing the following security practices to minimize information disclosure:
