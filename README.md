@@ -1,7 +1,8 @@
 <div align="center">
 
 # metadata 🗃️
-<img width="1156" height="656" alt="image" src="https://github.com/user-attachments/assets/4c3a1052-484e-4435-8d83-ba281ef98401" />
+<img width="1331" height="424" alt="image" src="https://github.com/user-attachments/assets/fd3cfba4-f163-4b61-be4d-de84d205417d" />
+
 
 
 ### *Web Application File Reconnaissance & Metadata Extractor*
@@ -109,7 +110,8 @@ To analyze a target domain and automatically generate your executive reports and
 ```bash
 python3 metadata.py
 ```
-<img width="1088" height="766" alt="image" src="https://github.com/user-attachments/assets/d421a4b7-7b4b-4ee7-bbd5-6732491024da" />
+<img width="1660" height="896" alt="banner" src="https://github.com/user-attachments/assets/64f2c774-4fb3-47d4-ac03-2a8ab89b7c60" />
+
 <br>
 <br>
 
